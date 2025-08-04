@@ -1,8 +1,19 @@
 
+import { db } from '../db';
+import { insightsTable } from '../db/schema';
 import { type Insight } from '../schema';
+import { asc } from 'drizzle-orm';
 
 export const getInsights = async (): Promise<Insight[]> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all insights from the database ordered by order_index.
-    return [];
+  try {
+    const results = await db.select()
+      .from(insightsTable)
+      .orderBy(asc(insightsTable.order_index))
+      .execute();
+
+    return results;
+  } catch (error) {
+    console.error('Getting insights failed:', error);
+    throw error;
+  }
 };

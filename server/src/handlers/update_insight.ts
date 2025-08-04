@@ -1,15 +1,40 @@
 
+import { db } from '../db';
+import { insightsTable } from '../db/schema';
 import { type UpdateInsightInput, type Insight } from '../schema';
+import { eq } from 'drizzle-orm';
 
 export const updateInsight = async (input: UpdateInsightInput): Promise<Insight> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is updating an existing insight in the database.
-    return {
-        id: input.id,
-        title: input.title || 'Placeholder Title',
-        description: input.description || 'Placeholder Description',
-        order_index: input.order_index || 0,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Insight;
+  try {
+    // Build update values object with only provided fields
+    const updateValues: Partial<typeof insightsTable.$inferInsert> = {
+      updated_at: new Date()
+    };
+
+    if (input.title !== undefined) {
+      updateValues.title = input.title;
+    }
+    if (input.description !== undefined) {
+      updateValues.description = input.description;
+    }
+    if (input.order_index !== undefined) {
+      updateValues.order_index = input.order_index;
+    }
+
+    // Update insight record
+    const result = await db.update(insightsTable)
+      .set(updateValues)
+      .where(eq(insightsTable.id, input.id))
+      .returning()
+      .execute();
+
+    if (result.length === 0) {
+      throw new Error(`Insight with id ${input.id} not found`);
+    }
+
+    return result[0];
+  } catch (error) {
+    console.error('Insight update failed:', error);
+    throw error;
+  }
 };

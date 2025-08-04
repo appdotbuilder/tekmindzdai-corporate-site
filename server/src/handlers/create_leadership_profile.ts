@@ -1,15 +1,25 @@
 
+import { db } from '../db';
+import { leadershipProfilesTable } from '../db/schema';
 import { type CreateLeadershipProfileInput, type LeadershipProfile } from '../schema';
 
 export const createLeadershipProfile = async (input: CreateLeadershipProfileInput): Promise<LeadershipProfile> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new leadership profile and persisting it in the database.
-    return {
-        id: 0, // Placeholder ID
+  try {
+    // Insert leadership profile record
+    const result = await db.insert(leadershipProfilesTable)
+      .values({
         name: input.name,
         title: input.title,
-        order_index: input.order_index,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as LeadershipProfile;
+        order_index: input.order_index
+      })
+      .returning()
+      .execute();
+
+    // Return the created leadership profile
+    const leadershipProfile = result[0];
+    return leadershipProfile;
+  } catch (error) {
+    console.error('Leadership profile creation failed:', error);
+    throw error;
+  }
 };

@@ -1,15 +1,24 @@
 
+import { db } from '../db';
+import { solutionsTable } from '../db/schema';
 import { type CreateSolutionInput, type Solution } from '../schema';
 
 export const createSolution = async (input: CreateSolutionInput): Promise<Solution> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is creating a new solution and persisting it in the database.
-    return {
-        id: 0, // Placeholder ID
+  try {
+    // Insert solution record
+    const result = await db.insert(solutionsTable)
+      .values({
         title: input.title,
         description: input.description,
-        order_index: input.order_index,
-        created_at: new Date(),
-        updated_at: new Date()
-    } as Solution;
+        order_index: input.order_index
+      })
+      .returning()
+      .execute();
+
+    const solution = result[0];
+    return solution;
+  } catch (error) {
+    console.error('Solution creation failed:', error);
+    throw error;
+  }
 };

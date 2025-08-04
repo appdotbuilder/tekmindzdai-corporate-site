@@ -1,8 +1,19 @@
 
+import { db } from '../db';
+import { servicesTable } from '../db/schema';
 import { type Service } from '../schema';
+import { asc } from 'drizzle-orm';
 
 export const getServices = async (): Promise<Service[]> => {
-    // This is a placeholder declaration! Real code should be implemented here.
-    // The goal of this handler is fetching all services from the database ordered by order_index.
-    return [];
+  try {
+    const result = await db.select()
+      .from(servicesTable)
+      .orderBy(asc(servicesTable.order_index))
+      .execute();
+
+    return result;
+  } catch (error) {
+    console.error('Failed to get services:', error);
+    throw error;
+  }
 };
